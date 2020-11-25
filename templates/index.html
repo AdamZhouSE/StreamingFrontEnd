@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="../static/wordcloud2.js"></script>
+    <script type="text/javascript" src="//cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>
+</head>
+<body>
+<div id="canvas-container" align="center">
+    <canvas id="canvas" width="600px" height="400px"></canvas>
+</div>
+    <script type="text/javascript" charset="utf-8">
+        // 建立socket连接，
+        $(document).ready(function() {
+            namespace = '/test';
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            socket.on('server_response', function(res) {
+                console.log("获得数据")
+                console.log(res.data)
+                WordCloud(document.getElementById('canvas'),
+                    {   list: eval(res.data),
+                        gridSize: 16,
+                        fontWeight: 'normal',
+                        fontFamily: 'Times, serif',
+                        color: 'random-light',
+                        backgroundColor: '#333',
+                        rotateRatio: 1});
+            });
+        });
+    </script>
+</body>
+</html>
