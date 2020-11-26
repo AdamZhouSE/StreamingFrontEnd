@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+   <head>
+       <meta charset="utf-8">
+   </head>
+   <body style="height: 100%; margin: 0">
+       <div id="container" style="height: 100%"></div>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-gl/dist/echarts-gl.min.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-stat/dist/ecStat.min.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/dataTool.min.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/map/js/china.js"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/map/js/world.js"></script>
+<!--       <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=xfhhaTThl11qYVrqLZii6w8qE5ggnhrY&__ec_v__=20190126"></script>-->
+       <script type="text/javascript" src="http://api.map.baidu.com/getscript?v=2.0&ak=&services=&t=20200914160603"></script>
+       <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/bmap.min.js"></script>
+       <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+       <script type="text/javascript" src="https://cdn.bootcss.com/socket.io/1.5.1/socket.io.min.js"></script>
+       <script type="text/javascript">
+var dom = document.getElementById("container");
+var myChart = echarts.init(dom);
+var app = {};
+option = null;
+
+var timeCount = 6;//每天分成6个时间段
+var categoryCount = 15;//共展示15天
+
+var xAxisData = [];
+var customData = [];
+var legendData = [];
+var encodeY = [];
+dataList = [];
+
+$(document).ready(function (){
+    namespace = '/test2';
+    var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+    socket.on('server_response', function(res) {
+        console.log("获得数据")
+        console.log(eval(res.data))
+        dataList=eval(res.data)
+
+    });
+});
+legendData.push('trend');
+
+for (var i = 0; i < timeCount; i++) {
+    legendData.push((3*i) + '~'+ (3*(i+1))+'h');
+    encodeY.push(i+1);
+};
+setTimeout(function(){
+    for (var i = 0; i < categoryCount; i++) {
+        xAxisData.push('day' + i);
+        customData.push([i]);
+
+        console.log(dataList.length);
+        for (var j = 0; j < dataList.length; j++) {
+            dataList[j][i]=echarts.number.round(dataList[j][i],2);
+            customData[i].push(dataList[j][i]);
+        }
+    };
+    console.log(customData);
+},4000)
+
+
+    function renderItem(params, api) {
+        console.log(api)
+        var xValue = api.value(0);
+        var currentSeriesIndices = api.currentSeriesIndices();
+        console.log(currentSeriesIndices);
+        var barLayout = api.barLayout({
+            barGap: '30%', barCategoryGap: '20%', count: currentSeriesIndices.length - 1
+        });
+
+        var points = [];
+        for (var i = 0; i < currentSeriesIndices.length; i++) {
+            var seriesIndex = currentSeriesIndices[i];
+            if (seriesIndex !== params.seriesIndex) {
+                var point = api.coord([xValue, api.value(seriesIndex)]);
+                point[0] += barLayout[i - 1].offsetCenter;
+                point[1] -= 20;
+                points.push(point);
+            }
+        }
+        var style = api.style({
+            stroke: api.visual('color'),
+            fill: null
+        });
+
+        return {
+            type: 'polyline',
+            shape: {
+                points: points
+            },
+            style: style
+        };
+    }
+
+setTimeout(function(){
+    option = {
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: legendData
+        },
+        dataZoom: [{
+            type: 'slider',
+            start: 50,
+            end: 70
+        }, {
+            type: 'inside',
+            start: 50,
+            end: 70
+        }],
+        xAxis: {
+            data: xAxisData
+        },
+        yAxis: {},
+        series: [{
+            type: 'custom',
+            name: 'trend',
+            renderItem: renderItem,
+            itemStyle: {
+                borderWidth: 2
+            },
+            encode: {
+                x: 0,
+                y: encodeY
+            },
+            data: customData,
+            z: 100
+        }].concat(echarts.util.map(dataList, function (data, index) {
+            return {
+                type: 'bar',
+                animation: false,
+                name: legendData[index+1],
+                itemStyle: {
+                    opacity: 0.5
+                },
+                data: data
+            };
+        }))
+    };
+    if (option && typeof option === "object") {
+    myChart.setOption(option, true);
+}
+},5000);
+console.log(option)
+
+       </script>
+   </body>
+</html>
