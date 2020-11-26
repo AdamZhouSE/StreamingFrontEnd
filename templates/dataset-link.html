@@ -29,6 +29,8 @@ $(document).ready(function (){
         console.log("获得数据")
         console.log(res.data)
         source=eval(res.data)
+        itemName=res.itemName
+        console.log(itemName)
     });
 });
 
@@ -60,7 +62,7 @@ setTimeout(function () {
                     formatter: '{b} : {@2012} ({d}%)'
                 },
                 encode: {
-                    itemName: 'day',
+                    itemName: itemName,
                     value: '2012',
                     tooltip: '2012'
                 }

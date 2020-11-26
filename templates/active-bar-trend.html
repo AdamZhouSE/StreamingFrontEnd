@@ -22,8 +22,8 @@ var myChart = echarts.init(dom);
 var app = {};
 option = null;
 
-var timeCount = 6;//每天分成6个时间段
-var categoryCount = 15;//共展示15天
+var timeCount = 0;
+var categoryCount = 0;
 
 var xAxisData = [];
 var customData = [];
@@ -38,16 +38,17 @@ $(document).ready(function (){
         console.log("获得数据")
         console.log(eval(res.data))
         dataList=eval(res.data)
-
+        timeCount=res.timeCount
+        categoryCount=res.categoryCount
     });
 });
 legendData.push('trend');
 
-for (var i = 0; i < timeCount; i++) {
-    legendData.push((3*i) + '~'+ (3*(i+1))+'h');
-    encodeY.push(i+1);
-};
 setTimeout(function(){
+    for (var i = 0; i < timeCount; i++) {
+        legendData.push((24/timeCount*i) + '~'+ (24/timeCount*(i+1))+'h');
+        encodeY.push(i+1);
+    };
     for (var i = 0; i < categoryCount; i++) {
         xAxisData.push('day' + i);
         customData.push([i]);
