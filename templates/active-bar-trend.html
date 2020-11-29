@@ -32,7 +32,7 @@ var encodeY = [];
 dataList = [];
 
 $(document).ready(function (){
-    namespace = '/test2';
+    namespace = '/barChart';
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
     socket.on('server_response', function(res) {
         console.log("获得数据")

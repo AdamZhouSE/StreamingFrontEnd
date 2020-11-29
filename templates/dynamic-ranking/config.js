@@ -9,7 +9,7 @@
   encoding: "UTF-8",
 
   // 每个时间节点最多显示的条目数。
-  max_number: 15,
+  max_number: 20,
 
   // 控制是否显示顶部附加信息文字。
   showMessage: true,
